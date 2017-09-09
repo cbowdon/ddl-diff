@@ -3,6 +3,8 @@ package me.bowdon
 import scala.util.parsing.combinator._
 
 // Start with SQLite's grammar
+// https://sqlite.org/syntax/create-table-stmt.html
+
 abstract class SQLType
 case object Number extends SQLType
 case object Text extends SQLType
@@ -27,7 +29,7 @@ class ParseError(reason: String) {
 
 class DDLParser extends RegexParsers {
 
-  def create: Parser[String] = "(?i)create".r
+  def create: Parser[String] = "(?i)create( (temp|temporary))?".r
 
   // TODO: ANSI quotes
   def identifier: Parser[String] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { _.toString }
@@ -44,7 +46,7 @@ class DDLParser extends RegexParsers {
   def columns: Parser[Seq[ColumnDef]] = "(" ~> (column <~ ",".? ).* <~ ")"
 
   def table: Parser[TableDef] = {
-    "(?i)table".r ~> identifier ~ columns ^^ {
+    "(?i)table( (if not exists))?".r ~> identifier ~ columns ^^ {
       case name ~ cols => TableDef(name, cols, Seq.empty)
     }
   }
