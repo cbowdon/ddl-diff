@@ -2,14 +2,26 @@ package me.bowdon
 
 import scala.util.parsing.combinator._
 
-// Start with SQLite's grammar
-// https://sqlite.org/syntax/create-table-stmt.html
+// Start with SQLite's grammar.
+// To support multiple vendor grammars, will need to define a superset?
 
 abstract class SQLType
 case object Number extends SQLType
 case object Text extends SQLType
 
-case class ColumnConstraint()
+abstract class Order
+case object Asc extends Order
+case object Desc extends Order
+
+// https://sqlite.org/syntax/column-constraint.html
+abstract class ColumnConstraint // TODO name: Option[String]
+case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraint
+case object NotNull extends ColumnConstraint
+case object Unique extends ColumnConstraint
+case class Check(/* TODO */) extends ColumnConstraint
+case class Default(/* TODO */) extends ColumnConstraint
+case class Collate(collationName: String) extends ColumnConstraint
+case class ForeignKey(/* TODO */) extends ColumnConstraint
 
 case class TableConstraint()
 
@@ -18,6 +30,7 @@ case class ColumnDef(
   sqlType: SQLType,
   constraints: Seq[ColumnConstraint])
 
+// https://sqlite.org/syntax/create-table-stmt.html
 case class TableDef(
   name: String,
   columns: Seq[ColumnDef],
@@ -38,6 +51,8 @@ class DDLParser extends RegexParsers {
     "(?i)number".r ^^ { _ => Number } |
     "(?i)text".r ^^ { _ => Text }
   }
+
+  def columnConstraint: Parser[ColumnConstraint] = ???
 
   def column: Parser[ColumnDef] = {
     identifier ~ sqlType ^^ { case name ~ sqlType => ColumnDef(name, sqlType, Seq.empty) }
