@@ -1,9 +1,24 @@
 package me.bowdon
 
 import scala.util.parsing.combinator._
+import java.text.NumberFormat
 
 // Start with SQLite's grammar.
 // To support multiple vendor grammars, will need to define a superset?
+
+abstract class SQLLiteral
+case class NumericLiteral(value: Number) extends SQLLiteral
+case class SignedNumber(value: NumericLiteral, sign: Sign) extends SQLLiteral
+case class StringLiteral(value: String) extends SQLLiteral
+case class BlobLiteral(value: Array[Byte]) extends SQLLiteral
+case object Null extends SQLLiteral
+case object CurrentTime extends SQLLiteral
+case object CurrentDate extends SQLLiteral
+case object CurrentTimestamp extends SQLLiteral
+
+abstract class Sign
+case object Plus extends Sign
+case object Minus extends Sign
 
 abstract class SQLType
 case object Number extends SQLType
@@ -18,9 +33,9 @@ abstract class ColumnConstraint // TODO name: Option[String]
 case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraint
 case object IsNotNull extends ColumnConstraint
 case object Unique extends ColumnConstraint
-case class Check(/* TODO */) extends ColumnConstraint
-case class Default(value: Int) extends ColumnConstraint
+case class Default(value: SQLLiteral) extends ColumnConstraint
 case class Collate(collationName: String) extends ColumnConstraint
+case class Check(/* TODO */) extends ColumnConstraint
 case class ForeignKey(/* TODO */) extends ColumnConstraint
 
 case class TableConstraint()
@@ -80,8 +95,46 @@ class DDLParser extends RegexParsers {
     "(?i)collate".r ~> identifier ^^ { Collate(_) }
   }
 
+  def numericLiteral: Parser[NumericLiteral] = {
+    "[0-9]+".r ^^ { num => NumericLiteral(NumberFormat.getInstance().parse(num)) }
+  }
+
+  def signedNumber: Parser[SignedNumber] = {
+    ("-" | "+") ~ numericLiteral ^^ {
+      case sign ~ num => {
+        SignedNumber(num, sign match {
+          case "+" => Plus
+          case "-" => Minus
+        })
+      }
+    }
+  }
+
+  def stringLiteral: Parser[StringLiteral] = "'" ~> "[^']*".r <~ "'" ^^ { StringLiteral(_) }
+
+  def nullLiteral: Parser[SQLLiteral] = "(?i)null".r ^^ { _ => Null }
+
+  def currentTime: Parser[SQLLiteral] = "(?i)current_time".r ^^ { _ => CurrentTime }
+
+  def currentDate: Parser[SQLLiteral] = "(?i)current_date".r ^^ { _ => CurrentDate }
+
+  def currentTimestamp: Parser[SQLLiteral] = "(?i)current_timestamp".r ^^ { _ => CurrentTimestamp }
+
+  def literalValue: Parser[SQLLiteral] = {
+    stringLiteral |
+    numericLiteral |
+    nullLiteral |
+    currentTime |
+    currentDate |
+    currentTimestamp
+  }
+
+  def default: Parser[Default] = {
+    "(?i)default".r ~> (signedNumber | literalValue) ^^ { Default(_) }
+  }
+
   def columnConstraint: Parser[ColumnConstraint] = {
-    primaryKey | notNull | unique | collate
+    primaryKey | notNull | unique | collate | default
   }
 
   def column: Parser[ColumnDef] = {

@@ -68,15 +68,56 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq.empty))
   }
 
-  it should "parse default column constraints" in {
+  it should "parse default column constraints (numeric)" in {
 
     parser.apply("create table foo (id number default 0);") shouldEqual
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Number, Seq(Default(0)))),
+        Seq(ColumnDef("id", Number, Seq(Default(NumericLiteral(0))))),
         Seq.empty))
   }
+
+  it should "parse default column constraints (signed number)" in {
+
+    parser.apply("create table foo (id number default -1);") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(ColumnDef("id", Number, Seq(Default(SignedNumber(NumericLiteral(1), Minus))))),
+        Seq.empty))
+  }
+
+  it should "parse default column constraints (string literal)" in {
+
+    parser.apply("create table foo (name text default 'Bob');") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(ColumnDef("name", Text, Seq(Default(StringLiteral("Bob"))))),
+        Seq.empty))
+  }
+
+  it should "parse default column constraints (null)" in {
+
+    parser.apply("create table foo (name text default null);") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(ColumnDef("name", Text, Seq(Default(Null)))),
+        Seq.empty))
+  }
+
+  it should "parse default column constraints (current time)" in {
+
+    parser.apply("create table foo (name text default current_time);") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(ColumnDef("name", Text, Seq(Default(CurrentTime)))),
+        Seq.empty))
+  }
+
 
   it should "parse multiple column constraints" in {
 
@@ -87,7 +128,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq(
           ColumnDef("id", Number, Seq(PrimaryKey(None, false))),
           ColumnDef("name", Text, Seq(Unique, IsNotNull, Collate("nocase"))),
-          ColumnDef("size", Text, Seq(Default(0)))),
+          ColumnDef("size", Number, Seq(Default(NumericLiteral(0))))),
         Seq.empty))
   }
 
