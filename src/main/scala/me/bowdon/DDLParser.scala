@@ -3,7 +3,7 @@ package me.bowdon
 import scala.util.parsing.combinator._
 
 // Start with SQLite's grammar.
-// To support multiple vendor grammars, will need to define a superset?
+// Need plan to support multiple vendor grammars
 
 // https://sqlite.org/datatype3.html
 abstract class SQLType
@@ -48,6 +48,8 @@ object DDLParser extends LiteralParsers {
 
   def create: Parser[String] = kw("create") <~ (kw("temp") | kw("temporary")).?
 
+  // TODO affinities
+  // https://sqlite.org/datatype3.html#determination_of_column_affinity
   def sqlType: Parser[SQLType] = {
     kw("text") ^^ { _ => Text } |
     kw("numeric") ^^ { _ => Numeric } |
@@ -104,6 +106,7 @@ object DDLParser extends LiteralParsers {
   }
 
   def column: Parser[ColumnDef] = {
+    // TODO the type is actually optional (defaults to blob with SQLite)
     identifier ~ sqlType ~ columnConstraint.* ^^ {
       case name ~ sqlType ~ colConstraints => ColumnDef(name, sqlType, colConstraints)
     }
