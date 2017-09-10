@@ -16,7 +16,7 @@ case object Desc extends Order
 // https://sqlite.org/syntax/column-constraint.html
 abstract class ColumnConstraint // TODO name: Option[String]
 case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraint
-case object NotNull extends ColumnConstraint
+case object IsNotNull extends ColumnConstraint
 case object Unique extends ColumnConstraint
 case class Check(/* TODO */) extends ColumnConstraint
 case class Default(value: Int) extends ColumnConstraint
@@ -68,8 +68,20 @@ class DDLParser extends RegexParsers {
     }
   }
 
+  def notNull: Parser[ColumnConstraint] = {
+    "(?i)not null".r ^^ { _ => IsNotNull }
+  }
+
+  def unique: Parser[ColumnConstraint] = {
+    "(?i)unique".r ^^ { _ => Unique }
+  }
+
+  def collate: Parser[Collate] = {
+    "(?i)collate".r ~> identifier ^^ { Collate(_) }
+  }
+
   def columnConstraint: Parser[ColumnConstraint] = {
-    primaryKey ^^ identity
+    primaryKey | notNull | unique | collate
   }
 
   def column: Parser[ColumnDef] = {

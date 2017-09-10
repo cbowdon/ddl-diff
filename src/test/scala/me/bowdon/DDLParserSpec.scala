@@ -16,6 +16,18 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq.empty))
   }
 
+  it should "parse multiple columns" in {
+
+    parser.apply("create table foo (id number, name text);") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(
+          ColumnDef("id", Number, Seq.empty),
+          ColumnDef("name", Text, Seq.empty)),
+        Seq.empty))
+  }
+
   it should "parse primary key column constraints" in {
 
     parser.apply("create table foo (id number primary key asc autoincrement);") shouldEqual
@@ -32,9 +44,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Number, Seq(NotNull)),
-          ColumnDef("name", Text, Seq.empty)),
+        Seq(ColumnDef("id", Number, Seq(IsNotNull))),
         Seq.empty))
   }
 
@@ -44,21 +54,17 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Number, Seq(NotNull)),
-          ColumnDef("name", Text, Seq.empty)),
+        Seq(ColumnDef("id", Number, Seq(Unique))),
         Seq.empty))
   }
 
-  it should "parse multiple columns" in {
+  it should "parse collate column constraints" in {
 
-    parser.apply("create table foo (id number, name text);") shouldEqual
+    parser.apply("create table foo (name text collate binary);") shouldEqual
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Number, Seq.empty),
-          ColumnDef("name", Text, Seq.empty)),
+        Seq(ColumnDef("name", Text, Seq(Collate("binary")))),
         Seq.empty))
   }
 
@@ -68,21 +74,19 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Number, Seq(NotNull)),
-          ColumnDef("name", Text, Seq.empty)),
+        Seq(ColumnDef("id", Number, Seq(Default(0)))),
         Seq.empty))
   }
 
   it should "parse multiple column constraints" in {
 
-    parser.apply("create table foo (id number primary key, name text unique not null, size number default 0);") shouldEqual
+    parser.apply("create table foo (id number primary key, name text unique not null collate nocase, size number default 0);") shouldEqual
     Right(
       TableDef(
         "foo",
         Seq(
           ColumnDef("id", Number, Seq(PrimaryKey(None, false))),
-          ColumnDef("name", Text, Seq(Unique, NotNull)),
+          ColumnDef("name", Text, Seq(Unique, IsNotNull, Collate("nocase"))),
           ColumnDef("size", Text, Seq(Default(0)))),
         Seq.empty))
   }
