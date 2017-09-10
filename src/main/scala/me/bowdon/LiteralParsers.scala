@@ -3,6 +3,10 @@ package me.bowdon
 import scala.util.parsing.combinator._
 import java.text.NumberFormat
 
+abstract class Sign
+case object Plus extends Sign
+case object Minus extends Sign
+
 abstract class Literal
 case class NumericLiteral(value: Number) extends Literal
 case class SignedNumber(value: NumericLiteral, sign: Sign) extends Literal

@@ -5,13 +5,13 @@ import scala.util.parsing.combinator._
 // Start with SQLite's grammar.
 // To support multiple vendor grammars, will need to define a superset?
 
-abstract class Sign
-case object Plus extends Sign
-case object Minus extends Sign
-
+// https://sqlite.org/datatype3.html
 abstract class SQLType
-case object Number extends SQLType
 case object Text extends SQLType
+case object Numeric extends SQLType
+case object Integer extends SQLType
+case object Real extends SQLType
+case object Blob extends SQLType
 
 abstract class Order
 case object Asc extends Order
@@ -49,8 +49,11 @@ object DDLParser extends LiteralParsers {
   def create: Parser[String] = kw("create") <~ (kw("temp") | kw("temporary")).?
 
   def sqlType: Parser[SQLType] = {
-    kw("number") ^^ { _ => Number } |
-    kw("text") ^^ { _ => Text }
+    kw("text") ^^ { _ => Text } |
+    kw("numeric") ^^ { _ => Numeric } |
+    kw("integer") ^^ { _ => Integer } |
+    kw("real") ^^ { _ => Real } |
+    kw("blob") ^^ { _ => Blob }
   }
 
   def order: Parser[Order] = (kw("asc") | kw("desc")) ^^ {
