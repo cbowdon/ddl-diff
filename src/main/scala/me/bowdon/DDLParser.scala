@@ -1,20 +1,9 @@
 package me.bowdon
 
 import scala.util.parsing.combinator._
-import java.text.NumberFormat
 
 // Start with SQLite's grammar.
 // To support multiple vendor grammars, will need to define a superset?
-
-abstract class SQLLiteral
-case class NumericLiteral(value: Number) extends SQLLiteral
-case class SignedNumber(value: NumericLiteral, sign: Sign) extends SQLLiteral
-case class StringLiteral(value: String) extends SQLLiteral
-case class BlobLiteral(value: Array[Byte]) extends SQLLiteral
-case object Null extends SQLLiteral
-case object CurrentTime extends SQLLiteral
-case object CurrentDate extends SQLLiteral
-case object CurrentTimestamp extends SQLLiteral
 
 abstract class Sign
 case object Plus extends Sign
@@ -33,7 +22,7 @@ abstract class ColumnConstraint // TODO name: Option[String]
 case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraint
 case object IsNotNull extends ColumnConstraint
 case object Unique extends ColumnConstraint
-case class Default(value: SQLLiteral) extends ColumnConstraint
+case class Default(value: Literal) extends ColumnConstraint
 case class Collate(collationName: String) extends ColumnConstraint
 case class Check(/* TODO */) extends ColumnConstraint
 case class ForeignKey(/* TODO */) extends ColumnConstraint
@@ -55,7 +44,7 @@ class ParseError(reason: String) {
   override def toString = reason
 }
 
-class DDLParser extends RegexParsers {
+object DDLParser extends RegexParsers with LiteralParsers {
 
   def create: Parser[String] = "(?i)create( (temp|temporary))?".r
 
@@ -95,10 +84,6 @@ class DDLParser extends RegexParsers {
     "(?i)collate".r ~> identifier ^^ { Collate(_) }
   }
 
-  def numericLiteral: Parser[NumericLiteral] = {
-    "[0-9]+".r ^^ { num => NumericLiteral(NumberFormat.getInstance().parse(num)) }
-  }
-
   def signedNumber: Parser[SignedNumber] = {
     ("-" | "+") ~ numericLiteral ^^ {
       case sign ~ num => {
@@ -108,25 +93,6 @@ class DDLParser extends RegexParsers {
         })
       }
     }
-  }
-
-  def stringLiteral: Parser[StringLiteral] = "'" ~> "[^']*".r <~ "'" ^^ { StringLiteral(_) }
-
-  def nullLiteral: Parser[SQLLiteral] = "(?i)null".r ^^ { _ => Null }
-
-  def currentTime: Parser[SQLLiteral] = "(?i)current_time".r ^^ { _ => CurrentTime }
-
-  def currentDate: Parser[SQLLiteral] = "(?i)current_date".r ^^ { _ => CurrentDate }
-
-  def currentTimestamp: Parser[SQLLiteral] = "(?i)current_timestamp".r ^^ { _ => CurrentTimestamp }
-
-  def literalValue: Parser[SQLLiteral] = {
-    stringLiteral |
-    numericLiteral |
-    nullLiteral |
-    currentTime |
-    currentDate |
-    currentTimestamp
   }
 
   def default: Parser[Default] = {
@@ -168,7 +134,6 @@ class DDLParser extends RegexParsers {
 
 // Just to make it do something
 object Main extends App {
-  val parser = new DDLParser
-  val result = parser.apply("create table foo")
+  val result = DDLParser.apply("create table foo")
   println(result)
 }

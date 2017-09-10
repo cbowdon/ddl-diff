@@ -4,11 +4,10 @@ import org.scalatest._
 import org.scalatest.Matchers._
 
 class DDLParserSpec extends FlatSpec with Matchers {
-  val parser = new DDLParser
 
   "The DDLParser class" should "parse a simple create" in {
 
-    parser.apply("create table foo (id number);") shouldEqual
+    DDLParser.apply("create table foo (id number);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -18,7 +17,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse multiple columns" in {
 
-    parser.apply("create table foo (id number, name text);") shouldEqual
+    DDLParser.apply("create table foo (id number, name text);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -30,7 +29,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse primary key column constraints" in {
 
-    parser.apply("create table foo (id number primary key asc autoincrement);") shouldEqual
+    DDLParser.apply("create table foo (id number primary key asc autoincrement);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -40,7 +39,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse not null column constraints" in {
 
-    parser.apply("create table foo (id number not null);") shouldEqual
+    DDLParser.apply("create table foo (id number not null);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -50,7 +49,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse unique column constraints" in {
 
-    parser.apply("create table foo (id number unique);") shouldEqual
+    DDLParser.apply("create table foo (id number unique);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -60,7 +59,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse collate column constraints" in {
 
-    parser.apply("create table foo (name text collate binary);") shouldEqual
+    DDLParser.apply("create table foo (name text collate binary);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -70,7 +69,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse default column constraints (numeric)" in {
 
-    parser.apply("create table foo (id number default 0);") shouldEqual
+    DDLParser.apply("create table foo (id number default 0);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -80,7 +79,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse default column constraints (signed number)" in {
 
-    parser.apply("create table foo (id number default -1);") shouldEqual
+    DDLParser.apply("create table foo (id number default -1);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -90,7 +89,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse default column constraints (string literal)" in {
 
-    parser.apply("create table foo (name text default 'Bob');") shouldEqual
+    DDLParser.apply("create table foo (name text default 'Bob');") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -100,7 +99,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse default column constraints (null)" in {
 
-    parser.apply("create table foo (name text default null);") shouldEqual
+    DDLParser.apply("create table foo (name text default null);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -110,7 +109,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse default column constraints (current time)" in {
 
-    parser.apply("create table foo (name text default current_time);") shouldEqual
+    DDLParser.apply("create table foo (name text default current_time);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -121,7 +120,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "parse multiple column constraints" in {
 
-    parser.apply("create table foo (id number primary key, name text unique not null collate nocase, size number default 0);") shouldEqual
+    DDLParser.apply("create table foo (id number primary key, name text unique not null collate nocase, size number default 0);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -134,7 +133,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "ignore modifiers like 'if not exists'" in {
 
-    parser.apply("create table if not exists foo (id number);") shouldEqual
+    DDLParser.apply("create table if not exists foo (id number);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -144,7 +143,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "ignore modifiers like 'temp'" in {
 
-    parser.apply("create temp table if not exists foo (id number);") shouldEqual
+    DDLParser.apply("create temp table if not exists foo (id number);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -154,7 +153,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "not care if people are shouting" in {
 
-    parser.apply("CREATE TABLE foo (id NUMBER);") shouldEqual
+    DDLParser.apply("CREATE TABLE foo (id NUMBER);") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -164,7 +163,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "not mind a missing terminator" in {
 
-    parser.apply("CREATE TABLE foo (id NUMBER)") shouldEqual
+    DDLParser.apply("CREATE TABLE foo (id NUMBER)") shouldEqual
     Right(
       TableDef(
         "foo",
@@ -174,7 +173,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
 
   it should "fail to parse invalid syntax" in {
 
-    parser.apply("create foo, a table") should be ('left)
+    DDLParser.apply("create foo, a table") should be ('left)
   }
 
 }
