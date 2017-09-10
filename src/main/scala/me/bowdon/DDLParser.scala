@@ -44,27 +44,24 @@ class ParseError(reason: String) {
   override def toString = reason
 }
 
-object DDLParser extends RegexParsers with LiteralParsers {
+object DDLParser extends LiteralParsers {
 
-  def create: Parser[String] = "(?i)create( (temp|temporary))?".r
-
-  // TODO: ANSI quotes
-  def identifier: Parser[String] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { _.toString }
+  def create: Parser[String] = kw("create") <~ (kw("temp") | kw("temporary")).?
 
   def sqlType: Parser[SQLType] = {
-    "(?i)number".r ^^ { _ => Number } |
-    "(?i)text".r ^^ { _ => Text }
+    kw("number") ^^ { _ => Number } |
+    kw("text") ^^ { _ => Text }
   }
 
-  def order: Parser[Order] = ("(?i)asc".r | "(?i)desc".r) ^^ {
-    (_: String).toLowerCase() match {
+  def order: Parser[Order] = (kw("asc") | kw("desc")) ^^ {
+    (_: String) match {
       case "asc" => Asc
       case "desc" => Desc
     }
   }
 
   def primaryKey: Parser[PrimaryKey] = {
-    "(?i)primary key".r ~> order.? ~ "(?i)autoincrement".r.? ^^ {
+    kw("primary key") ~> order.? ~ kw("autoincrement").? ^^ {
       case order ~ autoincrement => PrimaryKey(order, autoincrement match {
         case Some(_) => true
         case None => false
@@ -73,15 +70,15 @@ object DDLParser extends RegexParsers with LiteralParsers {
   }
 
   def notNull: Parser[ColumnConstraint] = {
-    "(?i)not null".r ^^ { _ => IsNotNull }
+    kw("not") ~ kw("null") ^^ { _ => IsNotNull }
   }
 
   def unique: Parser[ColumnConstraint] = {
-    "(?i)unique".r ^^ { _ => Unique }
+    kw("unique") ^^ { _ => Unique }
   }
 
   def collate: Parser[Collate] = {
-    "(?i)collate".r ~> identifier ^^ { Collate(_) }
+    kw("collate") ~> identifier ^^ { Collate(_) }
   }
 
   def signedNumber: Parser[SignedNumber] = {
@@ -96,7 +93,7 @@ object DDLParser extends RegexParsers with LiteralParsers {
   }
 
   def default: Parser[Default] = {
-    "(?i)default".r ~> (signedNumber | literalValue) ^^ { Default(_) }
+    kw("default") ~> (signedNumber | literalValue) ^^ { Default(_) }
   }
 
   def columnConstraint: Parser[ColumnConstraint] = {
@@ -112,7 +109,7 @@ object DDLParser extends RegexParsers with LiteralParsers {
   def columns: Parser[Seq[ColumnDef]] = "(" ~> (column <~ ",".? ).* <~ ")"
 
   def table: Parser[TableDef] = {
-    "(?i)table( (if not exists))?".r ~> identifier ~ columns ^^ {
+    kw("table") ~ (kw("if") ~ kw("not") ~ kw("exists")).? ~> identifier ~ columns ^^ {
       case name ~ cols => TableDef(name, cols, Seq.empty)
     }
   }
@@ -130,10 +127,4 @@ object DDLParser extends RegexParsers with LiteralParsers {
       case failure: NoSuccess => Left(new ParseError(failure.msg))
     }
   }
-}
-
-// Just to make it do something
-object Main extends App {
-  val result = DDLParser.apply("create table foo")
-  println(result)
 }

@@ -13,7 +13,7 @@ case object CurrentTime extends Literal
 case object CurrentDate extends Literal
 case object CurrentTimestamp extends Literal
 
-trait LiteralParsers extends RegexParsers {
+trait LiteralParsers extends SQLParsers {
 
   def numericLiteral: Parser[NumericLiteral] = {
     "[0-9]+\\.?[0-9]*".r ^^ { num => NumericLiteral(NumberFormat.getInstance().parse(num)) }
@@ -22,13 +22,13 @@ trait LiteralParsers extends RegexParsers {
   // TODO escaping quotes
   def stringLiteral: Parser[StringLiteral] = "'" ~> "[^']*".r <~ "'" ^^ { StringLiteral(_) }
 
-  def nullLiteral: Parser[Literal] = "(?i)null".r ^^ { _ => Null }
+  def nullLiteral: Parser[Literal] = kw("null") ^^ { _ => Null }
 
-  def currentTime: Parser[Literal] = "(?i)current_time".r ^^ { _ => CurrentTime }
+  def currentTime: Parser[Literal] = kw("current_time") ^^ { _ => CurrentTime }
 
-  def currentDate: Parser[Literal] = "(?i)current_date".r ^^ { _ => CurrentDate }
+  def currentDate: Parser[Literal] = kw("current_date") ^^ { _ => CurrentDate }
 
-  def currentTimestamp: Parser[Literal] = "(?i)current_timestamp".r ^^ { _ => CurrentTimestamp }
+  def currentTimestamp: Parser[Literal] = kw("current_timestamp") ^^ { _ => CurrentTimestamp }
 
   def literalValue: Parser[Literal] = {
     stringLiteral |

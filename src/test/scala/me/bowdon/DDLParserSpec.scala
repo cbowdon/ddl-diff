@@ -161,6 +161,16 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq.empty))
   }
 
+  it should "not care about messy whitespace" in {
+
+    DDLParser.apply("CREATE     TABLE  foo    ( id\t\tNUMBER );") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(ColumnDef("id", Number, Seq.empty)),
+        Seq.empty))
+  }
+
   it should "not mind a missing terminator" in {
 
     DDLParser.apply("CREATE TABLE foo (id NUMBER)") shouldEqual
