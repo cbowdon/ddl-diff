@@ -19,7 +19,7 @@ case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends Colu
 case object NotNull extends ColumnConstraint
 case object Unique extends ColumnConstraint
 case class Check(/* TODO */) extends ColumnConstraint
-case class Default(/* TODO */) extends ColumnConstraint
+case class Default(value: Int) extends ColumnConstraint
 case class Collate(collationName: String) extends ColumnConstraint
 case class ForeignKey(/* TODO */) extends ColumnConstraint
 
@@ -52,10 +52,30 @@ class DDLParser extends RegexParsers {
     "(?i)text".r ^^ { _ => Text }
   }
 
-  def columnConstraint: Parser[ColumnConstraint] = ???
+  def order: Parser[Order] = ("(?i)asc".r | "(?i)desc".r) ^^ {
+    (_: String).toLowerCase() match {
+      case "asc" => Asc
+      case "desc" => Desc
+    }
+  }
+
+  def primaryKey: Parser[PrimaryKey] = {
+    "(?i)primary key".r ~> order.? ~ "(?i)autoincrement".r.? ^^ {
+      case order ~ autoincrement => PrimaryKey(order, autoincrement match {
+        case Some(_) => true
+        case None => false
+      })
+    }
+  }
+
+  def columnConstraint: Parser[ColumnConstraint] = {
+    primaryKey ^^ identity
+  }
 
   def column: Parser[ColumnDef] = {
-    identifier ~ sqlType ^^ { case name ~ sqlType => ColumnDef(name, sqlType, Seq.empty) }
+    identifier ~ sqlType ~ columnConstraint.* ^^ {
+      case name ~ sqlType ~ colConstraints => ColumnDef(name, sqlType, colConstraints)
+    }
   }
 
   def columns: Parser[Seq[ColumnDef]] = "(" ~> (column <~ ",".? ).* <~ ")"

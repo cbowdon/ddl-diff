@@ -22,9 +22,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Number, Seq(PrimaryKey(Some(Asc), true))),
-          ColumnDef("name", Text, Seq.empty)),
+        Seq(ColumnDef("id", Number, Seq(PrimaryKey(Some(Asc), true)))),
         Seq.empty))
   }
 
@@ -52,6 +50,18 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq.empty))
   }
 
+  it should "parse multiple columns" in {
+
+    parser.apply("create table foo (id number, name text);") shouldEqual
+    Right(
+      TableDef(
+        "foo",
+        Seq(
+          ColumnDef("id", Number, Seq.empty),
+          ColumnDef("name", Text, Seq.empty)),
+        Seq.empty))
+  }
+
   it should "parse default column constraints" in {
 
     parser.apply("create table foo (id number default 0);") shouldEqual
@@ -73,19 +83,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq(
           ColumnDef("id", Number, Seq(PrimaryKey(None, false))),
           ColumnDef("name", Text, Seq(Unique, NotNull)),
-          ColumnDef("size", Text, Seq(Default(/* TODO */)))),
-        Seq.empty))
-  }
-
-  it should "parse multiple columns" in {
-
-    parser.apply("create table foo (id number, name text);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(
-          ColumnDef("id", Number, Seq.empty),
-          ColumnDef("name", Text, Seq.empty)),
+          ColumnDef("size", Text, Seq(Default(0)))),
         Seq.empty))
   }
 
