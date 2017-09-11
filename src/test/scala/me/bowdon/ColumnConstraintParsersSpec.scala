@@ -60,6 +60,11 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
     ColumnConstraintParsersImpl.apply("default current_time") shouldEqual Right(ColumnConstraint(None, Default(CurrentTime)))
   }
 
+  it should "parse check column constraints" in {
+
+    ColumnConstraintParsersImpl.apply("check (something > nothing)") shouldEqual Right(ColumnConstraint(None, Check("something > nothing")))
+  }
+
   it should "parse named column constraints" in {
 
     ColumnConstraintParsersImpl.apply("constraint it_aint_null not null") shouldEqual Right(ColumnConstraint(Some("it_aint_null"), IsNotNull))
