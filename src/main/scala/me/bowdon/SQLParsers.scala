@@ -2,6 +2,10 @@ package me.bowdon
 
 import scala.util.parsing.combinator._
 
+abstract class Order
+case object Asc extends Order
+case object Desc extends Order
+
 /**
   * Building blocks for SQL parsing
   */
@@ -14,5 +18,12 @@ trait SQLParsers extends RegexParsers {
 
   // TODO: ANSI quotes
   def identifier: Parser[String] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { _.toString }
+
+  def order: Parser[Order] = (kw("asc") | kw("desc")) ^^ {
+    (_: String) match {
+      case "asc" => Asc
+      case "desc" => Desc
+    }
+  }
 
 }

@@ -1,7 +1,5 @@
 package me.bowdon
 
-import scala.util.parsing.combinator._
-
 // Start with SQLite's grammar.
 // Need plan to support multiple vendor grammars
 
@@ -12,20 +10,6 @@ case object Numeric extends SQLType
 case object Integer extends SQLType
 case object Real extends SQLType
 case object Blob extends SQLType
-
-abstract class Order
-case object Asc extends Order
-case object Desc extends Order
-
-// https://sqlite.org/syntax/column-constraint.html
-abstract class ColumnConstraint // TODO name: Option[String]
-case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraint
-case object IsNotNull extends ColumnConstraint
-case object Unique extends ColumnConstraint
-case class Default(value: Literal) extends ColumnConstraint
-case class Collate(collationName: String) extends ColumnConstraint
-case class Check(/* TODO */) extends ColumnConstraint
-case class ForeignKey(/* TODO */) extends ColumnConstraint
 
 case class TableConstraint()
 
@@ -44,7 +28,7 @@ class ParseError(reason: String) {
   override def toString = reason
 }
 
-object DDLParser extends LiteralParsers {
+object DDLParser extends ColumnConstraintParsers {
 
   def create: Parser[String] = kw("create") <~ (kw("temp") | kw("temporary")).?
 
@@ -56,53 +40,6 @@ object DDLParser extends LiteralParsers {
     kw("integer") ^^ { _ => Integer } |
     kw("real") ^^ { _ => Real } |
     kw("blob") ^^ { _ => Blob }
-  }
-
-  def order: Parser[Order] = (kw("asc") | kw("desc")) ^^ {
-    (_: String) match {
-      case "asc" => Asc
-      case "desc" => Desc
-    }
-  }
-
-  def primaryKey: Parser[PrimaryKey] = {
-    kw("primary key") ~> order.? ~ kw("autoincrement").? ^^ {
-      case order ~ autoincrement => PrimaryKey(order, autoincrement match {
-        case Some(_) => true
-        case None => false
-      })
-    }
-  }
-
-  def notNull: Parser[ColumnConstraint] = {
-    kw("not") ~ kw("null") ^^ { _ => IsNotNull }
-  }
-
-  def unique: Parser[ColumnConstraint] = {
-    kw("unique") ^^ { _ => Unique }
-  }
-
-  def collate: Parser[Collate] = {
-    kw("collate") ~> identifier ^^ { Collate(_) }
-  }
-
-  def signedNumber: Parser[SignedNumber] = {
-    ("-" | "+") ~ numericLiteral ^^ {
-      case sign ~ num => {
-        SignedNumber(num, sign match {
-          case "+" => Plus
-          case "-" => Minus
-        })
-      }
-    }
-  }
-
-  def default: Parser[Default] = {
-    kw("default") ~> (signedNumber | literalValue) ^^ { Default(_) }
-  }
-
-  def columnConstraint: Parser[ColumnConstraint] = {
-    primaryKey | notNull | unique | collate | default
   }
 
   def column: Parser[ColumnDef] = {

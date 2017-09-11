@@ -27,7 +27,7 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq.empty))
   }
 
-  it should "parse primary key column constraints" in {
+  it should "parse single column constraints" in {
 
     DDLParser.apply("create table foo (id numeric primary key asc autoincrement);") shouldEqual
     Right(
@@ -36,87 +36,6 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq(ColumnDef("id", Numeric, Seq(PrimaryKey(Some(Asc), true)))),
         Seq.empty))
   }
-
-  it should "parse not null column constraints" in {
-
-    DDLParser.apply("create table foo (id numeric not null);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("id", Numeric, Seq(IsNotNull))),
-        Seq.empty))
-  }
-
-  it should "parse unique column constraints" in {
-
-    DDLParser.apply("create table foo (id numeric unique);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("id", Numeric, Seq(Unique))),
-        Seq.empty))
-  }
-
-  it should "parse collate column constraints" in {
-
-    DDLParser.apply("create table foo (name text collate binary);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("name", Text, Seq(Collate("binary")))),
-        Seq.empty))
-  }
-
-  it should "parse default column constraints (numeric)" in {
-
-    DDLParser.apply("create table foo (id numeric default 0);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("id", Numeric, Seq(Default(NumericLiteral(0))))),
-        Seq.empty))
-  }
-
-  it should "parse default column constraints (signed numeric)" in {
-
-    DDLParser.apply("create table foo (id numeric default -1);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("id", Numeric, Seq(Default(SignedNumber(NumericLiteral(1), Minus))))),
-        Seq.empty))
-  }
-
-  it should "parse default column constraints (string literal)" in {
-
-    DDLParser.apply("create table foo (name text default 'Bob');") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("name", Text, Seq(Default(StringLiteral("Bob"))))),
-        Seq.empty))
-  }
-
-  it should "parse default column constraints (null)" in {
-
-    DDLParser.apply("create table foo (name text default null);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("name", Text, Seq(Default(Null)))),
-        Seq.empty))
-  }
-
-  it should "parse default column constraints (current time)" in {
-
-    DDLParser.apply("create table foo (name text default current_time);") shouldEqual
-    Right(
-      TableDef(
-        "foo",
-        Seq(ColumnDef("name", Text, Seq(Default(CurrentTime)))),
-        Seq.empty))
-  }
-
 
   it should "parse multiple column constraints" in {
 
