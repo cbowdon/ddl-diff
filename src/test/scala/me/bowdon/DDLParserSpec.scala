@@ -11,8 +11,8 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq.empty)),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set.empty)),
+        Set.empty))
   }
 
   it should "parse multiple columns" in {
@@ -21,10 +21,10 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Numeric, Seq.empty),
-          ColumnDef("name", Text, Seq.empty)),
-        Seq.empty))
+        Map(
+          "id" -> ColumnDef("id", Numeric, Set.empty),
+          "name" -> ColumnDef("name", Text, Set.empty)),
+        Set.empty))
   }
 
   it should "not parse multiple columns with trailing comma" in {
@@ -38,8 +38,8 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq(ColumnConstraint(None, PrimaryKey(Some(Asc), true))))),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set(ColumnConstraint(None, PrimaryKey(Some(Asc), true))))),
+        Set.empty))
   }
 
   it should "parse multiple column constraints" in {
@@ -53,15 +53,15 @@ create table foo (
     Right(
       TableDef(
         "foo",
-        Seq(
-          ColumnDef("id", Numeric, Seq(ColumnConstraint(None, PrimaryKey(None, false)))),
-          ColumnDef("name", Text,
-            Seq(
+        Map(
+          "id" -> ColumnDef("id", Numeric, Set(ColumnConstraint(None, PrimaryKey(None, false)))),
+          "name" -> ColumnDef("name", Text,
+            Set(
               ColumnConstraint(Some("foo_unique_name_constraint"), Unique),
               ColumnConstraint(None, IsNotNull),
               ColumnConstraint(None, Collate("nocase")))),
-          ColumnDef("size", Numeric, Seq(ColumnConstraint(None, Default(NumericLiteral(0)))))),
-        Seq.empty))
+          "size" -> ColumnDef("size", Numeric, Set(ColumnConstraint(None, Default(NumericLiteral(0)))))),
+        Set.empty))
   }
 
   it should "ignore modifiers like 'if not exists'" in {
@@ -70,8 +70,8 @@ create table foo (
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq.empty)),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set.empty)),
+        Set.empty))
   }
 
   it should "ignore modifiers like 'temp'" in {
@@ -80,8 +80,8 @@ create table foo (
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq.empty)),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set.empty)),
+        Set.empty))
   }
 
   it should "not care if people are shouting" in {
@@ -90,8 +90,8 @@ create table foo (
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq.empty)),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set.empty)),
+        Set.empty))
   }
 
   it should "not care about messy whitespace" in {
@@ -100,8 +100,8 @@ create table foo (
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq.empty)),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set.empty)),
+        Set.empty))
   }
 
   it should "not mind a missing terminator" in {
@@ -110,8 +110,8 @@ create table foo (
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq.empty)),
-        Seq.empty))
+        Map("id" -> ColumnDef("id", Numeric, Set.empty)),
+        Set.empty))
   }
 
   it should "fail to parse invalid syntax" in {

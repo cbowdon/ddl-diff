@@ -16,13 +16,13 @@ case class TableConstraint()
 case class ColumnDef(
   name: String,
   sqlType: SQLType,
-  constraints: Seq[ColumnConstraint])
+  constraints: Set[ColumnConstraint])
 
 // https://sqlite.org/syntax/create-table-stmt.html
 case class TableDef(
   name: String,
-  columns: Seq[ColumnDef],
-  constraints: Seq[TableConstraint])
+  columns: Map[String,ColumnDef],
+  constraints: Set[TableConstraint])
 
 class ParseError(reason: String) {
   override def toString = reason
@@ -45,15 +45,21 @@ object DDLParser extends ColumnConstraintParsers {
   def column: Parser[ColumnDef] = {
     // TODO the type is actually optional (defaults to blob with SQLite)
     identifier ~ sqlType ~ columnConstraint.* ^^ {
-      case name ~ sqlType ~ colConstraints => ColumnDef(name, sqlType, colConstraints)
+      case name ~ sqlType ~ colConstraints => ColumnDef(name, sqlType, colConstraints.toSet)
     }
   }
 
-  def columns: Parser[Seq[ColumnDef]] = parens(repsep(column, ","))
+  def columns: Parser[Map[String,ColumnDef]] = {
+
+    val parser = parens(repsep(column, ","))
+
+    parser.map(colDefs =>
+      colDefs.map(col => (col.name, col)).toMap)
+  }
 
   def table: Parser[TableDef] = {
     kw("table") ~ (kw("if") ~ kw("not") ~ kw("exists")).? ~> identifier ~ columns ^^ {
-      case name ~ cols => TableDef(name, cols, Seq.empty)
+      case name ~ cols => TableDef(name, cols, Set.empty)
     }
   }
 
