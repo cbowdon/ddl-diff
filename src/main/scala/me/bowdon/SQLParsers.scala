@@ -19,6 +19,11 @@ trait SQLParsers extends RegexParsers {
   // TODO: ANSI quotes
   def identifier: Parser[String] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { _.toString }
 
+  /**
+    * Utility parser for expressions in parentheses
+    */
+  def parens[T](bodyParser: Parser[T]): Parser[T] = "(" ~> bodyParser <~ ")"
+
   def order: Parser[Order] = (kw("asc") | kw("desc")) ^^ {
     (_: String) match {
       case "asc" => Asc

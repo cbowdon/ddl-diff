@@ -49,7 +49,7 @@ object DDLParser extends ColumnConstraintParsers {
     }
   }
 
-  def columns: Parser[Seq[ColumnDef]] = "(" ~> (column <~ ",".? ).* <~ ")"
+  def columns: Parser[Seq[ColumnDef]] = parens(repsep(column, ","))
 
   def table: Parser[TableDef] = {
     kw("table") ~ (kw("if") ~ kw("not") ~ kw("exists")).? ~> identifier ~ columns ^^ {

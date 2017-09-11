@@ -27,6 +27,11 @@ class DDLParserSpec extends FlatSpec with Matchers {
         Seq.empty))
   }
 
+  it should "not parse multiple columns with trailing comma" in {
+
+    DDLParser.apply("create table foo (id numeric, name text,);") should be ('left)
+  }
+
   it should "parse single column constraints" in {
 
     DDLParser.apply("create table foo (id numeric primary key asc autoincrement);") shouldEqual

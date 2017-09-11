@@ -10,7 +10,9 @@ case object Unique extends ColumnConstraintDef
 case class Default(value: Literal) extends ColumnConstraintDef
 case class Collate(collationName: String) extends ColumnConstraintDef
 case class Check(expr: String) extends ColumnConstraintDef
-case class ForeignKey(/* TODO */) extends ColumnConstraintDef
+// TODO "on delete cascade" and friends
+// https://sqlite.org/syntax/foreign-key-clause.html
+case class ForeignKey(table: String, columns: Seq[String]) extends ColumnConstraintDef
 
 case class ColumnConstraint(name: Option[String], definition: ColumnConstraintDef)
 
@@ -54,11 +56,20 @@ trait ColumnConstraintParsers extends LiteralParsers {
 
   def check: Parser[ColumnConstraintDef] = {
     // TODO this is a buggy cheat: needs to be a complete expr parser here
-    kw("check") ~> ("(" ~> "[^)]+".r <~ ")") ^^ { Check(_) }
+    kw("check") ~> parens("[^)]+".r) ^^ { Check(_) }
+  }
+
+  def foreignKey: Parser[ColumnConstraintDef] = {
+    kw("references") ~> identifier ~ parens(repsep(identifier, ",")).? ^^ {
+      case table ~ columns => ForeignKey(table, columns match {
+        case Some(cols) => cols
+        case None => Seq.empty
+      })
+    }
   }
 
   def constraintDef: Parser[ColumnConstraintDef] = {
-    primaryKey | notNull | unique | collate | default | check
+    primaryKey | notNull | unique | collate | default | check | foreignKey
   }
 
   def constraintName: Parser[String] = kw("constraint") ~> identifier

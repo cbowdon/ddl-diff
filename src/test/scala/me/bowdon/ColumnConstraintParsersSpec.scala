@@ -65,6 +65,26 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
     ColumnConstraintParsersImpl.apply("check (something > nothing)") shouldEqual Right(ColumnConstraint(None, Check("something > nothing")))
   }
 
+  it should "parse foreign key column constraints (no cols)" in {
+
+    ColumnConstraintParsersImpl.apply("references bar") shouldEqual Right(ColumnConstraint(None, ForeignKey("bar", Seq.empty)))
+  }
+
+  it should "parse foreign key column constraints (one col)" in {
+
+    ColumnConstraintParsersImpl.apply("references bar (id)") shouldEqual Right(ColumnConstraint(None, ForeignKey("bar", Seq("id"))))
+  }
+
+  it should "parse foreign key column constraints (many cols)" in {
+
+    ColumnConstraintParsersImpl.apply("references bar (id, thing, stuff)") shouldEqual Right(ColumnConstraint(None, ForeignKey("bar", Seq("id", "thing", "stuff"))))
+  }
+
+  it should "not parse invalid foreign key column constraints (many cols with trailing comma)" in {
+
+    ColumnConstraintParsersImpl.apply("references bar (id, thing, stuff,)") should be ('left)
+  }
+
   it should "parse named column constraints" in {
 
     ColumnConstraintParsersImpl.apply("constraint it_aint_null not null") shouldEqual Right(ColumnConstraint(Some("it_aint_null"), IsNotNull))
