@@ -17,46 +17,51 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
 
   "ColumnConstraints" should "parse primary key column constraints" in {
 
-    ColumnConstraintParsersImpl.apply("primary key asc autoincrement") shouldEqual Right(PrimaryKey(Some(Asc), true))
+    ColumnConstraintParsersImpl.apply("primary key asc autoincrement") shouldEqual Right(ColumnConstraint(None, PrimaryKey(Some(Asc), true)))
   }
 
   it should "parse not null column constraints" in {
 
-    ColumnConstraintParsersImpl.apply("not null") shouldEqual Right(IsNotNull)
+    ColumnConstraintParsersImpl.apply("not null") shouldEqual Right(ColumnConstraint(None, IsNotNull))
   }
 
   it should "parse unique column constraints" in {
 
-    ColumnConstraintParsersImpl.apply("unique") shouldEqual Right(Unique)
+    ColumnConstraintParsersImpl.apply("unique") shouldEqual Right(ColumnConstraint(None, Unique))
   }
 
   it should "parse collate column constraints" in {
 
-    ColumnConstraintParsersImpl.apply("collate binary") shouldEqual Right(Collate("binary"))
+    ColumnConstraintParsersImpl.apply("collate binary") shouldEqual Right(ColumnConstraint(None, Collate("binary")))
   }
 
   it should "parse default column constraints (numeric)" in {
 
-    ColumnConstraintParsersImpl.apply("default 0") shouldEqual Right(Default(NumericLiteral(0)))
+    ColumnConstraintParsersImpl.apply("default 0") shouldEqual Right(ColumnConstraint(None, Default(NumericLiteral(0))))
   }
 
   it should "parse default column constraints (signed numeric)" in {
 
-    ColumnConstraintParsersImpl.apply("default -1") shouldEqual Right(Default(SignedNumber(NumericLiteral(1), Minus)))
+    ColumnConstraintParsersImpl.apply("default -1") shouldEqual Right(ColumnConstraint(None, Default(SignedNumber(NumericLiteral(1), Minus))))
   }
 
   it should "parse default column constraints (string literal)" in {
 
-    ColumnConstraintParsersImpl.apply("default 'Bob'") shouldEqual Right(Default(StringLiteral("Bob")))
+    ColumnConstraintParsersImpl.apply("default 'Bob'") shouldEqual Right(ColumnConstraint(None, Default(StringLiteral("Bob"))))
   }
 
   it should "parse default column constraints (null)" in {
 
-    ColumnConstraintParsersImpl.apply("default null") shouldEqual Right(Default(Null))
+    ColumnConstraintParsersImpl.apply("default null") shouldEqual Right(ColumnConstraint(None, Default(Null)))
   }
 
   it should "parse default column constraints (current time)" in {
 
-    ColumnConstraintParsersImpl.apply("default current_time") shouldEqual Right(Default(CurrentTime))
+    ColumnConstraintParsersImpl.apply("default current_time") shouldEqual Right(ColumnConstraint(None, Default(CurrentTime)))
+  }
+
+  it should "parse named column constraints" in {
+
+    ColumnConstraintParsersImpl.apply("constraint it_aint_null not null") shouldEqual Right(ColumnConstraint(Some("it_aint_null"), IsNotNull))
   }
 }

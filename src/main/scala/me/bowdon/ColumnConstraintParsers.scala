@@ -3,18 +3,20 @@ package me.bowdon
 import scala.util.parsing.combinator._
 
 // https://sqlite.org/syntax/column-constraint.html
-abstract class ColumnConstraint // TODO name: Option[String]
-case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraint
-case object IsNotNull extends ColumnConstraint
-case object Unique extends ColumnConstraint
-case class Default(value: Literal) extends ColumnConstraint
-case class Collate(collationName: String) extends ColumnConstraint
-case class Check(/* TODO */) extends ColumnConstraint
-case class ForeignKey(/* TODO */) extends ColumnConstraint
+abstract class ColumnConstraintDef
+case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraintDef
+case object IsNotNull extends ColumnConstraintDef
+case object Unique extends ColumnConstraintDef
+case class Default(value: Literal) extends ColumnConstraintDef
+case class Collate(collationName: String) extends ColumnConstraintDef
+case class Check(/* TODO */) extends ColumnConstraintDef
+case class ForeignKey(/* TODO */) extends ColumnConstraintDef
+
+case class ColumnConstraint(name: Option[String], definition: ColumnConstraintDef)
 
 trait ColumnConstraintParsers extends LiteralParsers {
 
-  def primaryKey: Parser[PrimaryKey] = {
+  def primaryKey: Parser[ColumnConstraintDef] = {
     kw("primary") ~ kw("key") ~> order.? ~ kw("autoincrement").? ^^ {
       case order ~ autoincrement => PrimaryKey(order, autoincrement match {
         case Some(_) => true
@@ -23,15 +25,15 @@ trait ColumnConstraintParsers extends LiteralParsers {
     }
   }
 
-  def notNull: Parser[ColumnConstraint] = {
+  def notNull: Parser[ColumnConstraintDef] = {
     kw("not") ~ kw("null") ^^ { _ => IsNotNull }
   }
 
-  def unique: Parser[ColumnConstraint] = {
+  def unique: Parser[ColumnConstraintDef] = {
     kw("unique") ^^ { _ => Unique }
   }
 
-  def collate: Parser[Collate] = {
+  def collate: Parser[ColumnConstraintDef] = {
     kw("collate") ~> identifier ^^ { Collate(_) }
   }
 
@@ -50,7 +52,15 @@ trait ColumnConstraintParsers extends LiteralParsers {
     kw("default") ~> (signedNumber | literalValue) ^^ { Default(_) }
   }
 
-  def columnConstraint: Parser[ColumnConstraint] = {
+  def constraintDef: Parser[ColumnConstraintDef] = {
     primaryKey | notNull | unique | collate | default
+  }
+
+  def constraintName: Parser[String] = kw("constraint") ~> identifier
+
+  def columnConstraint: Parser[ColumnConstraint] = {
+    constraintName.? ~ constraintDef ^^ {
+      case name ~ cdef => ColumnConstraint(name, cdef)
+    }
   }
 }

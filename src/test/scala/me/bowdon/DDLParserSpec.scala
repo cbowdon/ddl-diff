@@ -33,20 +33,29 @@ class DDLParserSpec extends FlatSpec with Matchers {
     Right(
       TableDef(
         "foo",
-        Seq(ColumnDef("id", Numeric, Seq(PrimaryKey(Some(Asc), true)))),
+        Seq(ColumnDef("id", Numeric, Seq(ColumnConstraint(None, PrimaryKey(Some(Asc), true))))),
         Seq.empty))
   }
 
   it should "parse multiple column constraints" in {
 
-    DDLParser.apply("create table foo (id numeric primary key, name text unique not null collate nocase, size numeric default 0);") shouldEqual
+    DDLParser.apply("""
+create table foo (
+  id numeric primary key
+, name text constraint foo_unique_name_constraint unique not null collate nocase
+, size numeric default 0
+);""") shouldEqual
     Right(
       TableDef(
         "foo",
         Seq(
-          ColumnDef("id", Numeric, Seq(PrimaryKey(None, false))),
-          ColumnDef("name", Text, Seq(Unique, IsNotNull, Collate("nocase"))),
-          ColumnDef("size", Numeric, Seq(Default(NumericLiteral(0))))),
+          ColumnDef("id", Numeric, Seq(ColumnConstraint(None, PrimaryKey(None, false)))),
+          ColumnDef("name", Text,
+            Seq(
+              ColumnConstraint(Some("foo_unique_name_constraint"), Unique),
+              ColumnConstraint(None, IsNotNull),
+              ColumnConstraint(None, Collate("nocase")))),
+          ColumnDef("size", Numeric, Seq(ColumnConstraint(None, Default(NumericLiteral(0)))))),
         Seq.empty))
   }
 
