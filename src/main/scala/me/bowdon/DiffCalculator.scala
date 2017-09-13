@@ -23,6 +23,13 @@ case class DropTableConstraint(tableName: String, constraint: TableConstraint) e
 object DiffCalculator {
 
   def diff(oldTable: Option[TableDef], newTable: Option[TableDef]): Seq[Migration] = {
-    ???
+    (oldTable, newTable) match {
+      case (None, None) => Seq()
+      case (None, Some(table)) => Seq(CreateTable(table))
+      case (Some(table), None) => Seq(DropTable(table.name))
+      case (Some(oldTabl), Some(newTabl)) => {
+        ???
+      }
+    }
   }
 }

@@ -26,6 +26,11 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     )
   }
 
+  it should "do nothing for nothing" in {
+
+    DiffCalculator.diff(None, None) shouldEqual Seq()
+  }
+
   it should "add missing columns" in {
 
     val oldTable = TableDef("foo", Map(), Set())
