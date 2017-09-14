@@ -27,8 +27,16 @@ object DiffCalculator {
       case (None, None) => Seq()
       case (None, Some(table)) => Seq(CreateTable(table))
       case (Some(table), None) => Seq(DropTable(table.name))
-      case (Some(oldTabl), Some(newTabl)) => {
-        ???
+      case (Some(oldTab), Some(newTab)) => {
+
+        val added = newTab.columns.keySet -- oldTab.columns.keySet
+        val dropped = oldTab.columns.keySet -- newTab.columns.keySet
+        val remaining = oldTab.columns.keySet & newTab.columns.keySet
+
+        val addColumns = added.map(col => AddColumn(newTab.name, newTab.columns(col)))
+        val dropColumns = dropped.map(col => DropColumn(oldTab.name, oldTab.columns(col)))
+
+        addColumns.toSeq ++ dropColumns.toSeq
       }
     }
   }
