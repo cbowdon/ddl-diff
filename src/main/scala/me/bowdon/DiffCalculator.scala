@@ -36,8 +36,22 @@ object DiffCalculator {
         val addColumns = added.map(col => AddColumn(newTab.name, newTab.columns(col)))
         val dropColumns = dropped.map(col => DropColumn(oldTab.name, oldTab.columns(col)))
 
-        addColumns.toSeq ++ dropColumns.toSeq
+        val columnConstraints = remaining.flatMap(col => {
+          diffColumnConstraints(newTab.name, oldTab.columns(col), newTab.columns(col))
+        })
+
+        dropColumns.toSeq ++ addColumns.toSeq ++ columnConstraints
       }
     }
+  }
+
+  def diffColumnConstraints(tableName: String, oldCol: ColumnDef, newCol: ColumnDef): Seq[Migration] =  {
+    val added = newCol.constraints -- oldCol.constraints
+    val dropped = oldCol.constraints -- newCol.constraints
+
+    val addConstraints = added.map(constraint => AddColumnConstraint(tableName, newCol.name, constraint))
+    val dropConstraints = dropped.map(constraint => DropColumnConstraint(tableName, oldCol.name, constraint))
+
+    dropConstraints.toSeq ++ addConstraints.toSeq
   }
 }
