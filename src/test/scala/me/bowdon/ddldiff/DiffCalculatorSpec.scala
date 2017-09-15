@@ -11,8 +11,8 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val newTable = TableDef("foo", Map("id" -> idCol), Set())
 
     DiffCalculator.diff(None, Some(newTable)) shouldEqual
-    Seq(
-      CreateTable(newTable))
+      Seq(
+        CreateTable(newTable))
   }
 
   it should "drop removed tables" in {
@@ -21,9 +21,8 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val oldTable = TableDef("foo", Map("id" -> idCol), Set())
 
     DiffCalculator.diff(Some(oldTable), None) shouldEqual
-    Seq(
-      DropTable("foo")
-    )
+      Seq(
+        DropTable("foo"))
   }
 
   it should "do nothing for nothing" in {
@@ -39,9 +38,8 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val newTable = oldTable.copy(columns = Map("id" -> idCol))
 
     DiffCalculator.diff(Some(oldTable), Some(newTable)) shouldEqual
-    Seq(
-      AddColumn("foo", idCol)
-    )
+      Seq(
+        AddColumn("foo", idCol))
   }
 
   it should "drop removed columns" in {
@@ -52,9 +50,8 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val newTable = oldTable.copy(columns = Map())
 
     DiffCalculator.diff(Some(oldTable), Some(newTable)) shouldEqual
-    Seq(
-      DropColumn("foo", idCol)
-    )
+      Seq(
+        DropColumn("foo", idCol))
   }
 
   it should "add new column constraints" in {
@@ -68,9 +65,8 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val newTable = oldTable.copy(columns = Map("id" -> newIdCol))
 
     DiffCalculator.diff(Some(oldTable), Some(newTable)) shouldEqual
-    Seq(
-      AddColumnConstraint("foo", "id", constraint)
-    )
+      Seq(
+        AddColumnConstraint("foo", "id", constraint))
   }
 
   it should "drop removed column constraints" in {
@@ -84,9 +80,8 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val newTable = oldTable.copy(columns = Map("id" -> newIdCol))
 
     DiffCalculator.diff(Some(oldTable), Some(newTable)) shouldEqual
-    Seq(
-      DropColumnConstraint("foo", "id", constraint)
-    )
+      Seq(
+        DropColumnConstraint("foo", "id", constraint))
   }
 
   it should "assume a constraint rename is a drop and create" in {
@@ -97,14 +92,11 @@ class DiffCalculatorSpec extends FlatSpec with Matchers {
     val oldTable = TableDef("foo", Map("id" -> idCol), Set())
     val newTable = oldTable.copy(
       columns = Map("id" -> idCol.copy(
-        constraints = Set(newConstraint))
-      )
-    )
+        constraints = Set(newConstraint))))
 
     DiffCalculator.diff(Some(oldTable), Some(newTable)) shouldEqual
-    Seq(
-      DropColumnConstraint("foo", "id", oldConstraint),
-      AddColumnConstraint("foo", "id", newConstraint)
-    )
+      Seq(
+        DropColumnConstraint("foo", "id", oldConstraint),
+        AddColumnConstraint("foo", "id", newConstraint))
   }
 }

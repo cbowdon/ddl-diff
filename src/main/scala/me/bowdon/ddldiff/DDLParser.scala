@@ -21,7 +21,7 @@ case class ColumnDef(
 // https://sqlite.org/syntax/create-table-stmt.html
 case class TableDef(
   name: String,
-  columns: Map[String,ColumnDef],
+  columns: Map[String, ColumnDef],
   constraints: Set[TableConstraint])
 
 class ParseError(reason: String) {
@@ -36,10 +36,10 @@ object DDLParser extends ColumnConstraintParsers {
   // https://sqlite.org/datatype3.html#determination_of_column_affinity
   def sqlType: Parser[SQLType] = {
     kw("text") ^^ { _ => Text } |
-    kw("numeric") ^^ { _ => Numeric } |
-    kw("integer") ^^ { _ => Integer } |
-    kw("real") ^^ { _ => Real } |
-    kw("blob") ^^ { _ => Blob }
+      kw("numeric") ^^ { _ => Numeric } |
+      kw("integer") ^^ { _ => Integer } |
+      kw("real") ^^ { _ => Real } |
+      kw("blob") ^^ { _ => Blob }
   }
 
   def column: Parser[ColumnDef] = {
@@ -49,7 +49,7 @@ object DDLParser extends ColumnConstraintParsers {
     }
   }
 
-  def columns: Parser[Map[String,ColumnDef]] = {
+  def columns: Parser[Map[String, ColumnDef]] = {
 
     val parser = parens(repsep(column, ","))
 

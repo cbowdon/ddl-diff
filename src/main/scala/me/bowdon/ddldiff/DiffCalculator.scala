@@ -45,7 +45,7 @@ object DiffCalculator {
     }
   }
 
-  def diffColumnConstraints(tableName: String, oldCol: ColumnDef, newCol: ColumnDef): Seq[Migration] =  {
+  def diffColumnConstraints(tableName: String, oldCol: ColumnDef, newCol: ColumnDef): Seq[Migration] = {
     val added = newCol.constraints -- oldCol.constraints
     val dropped = oldCol.constraints -- newCol.constraints
 

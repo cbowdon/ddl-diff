@@ -3,7 +3,6 @@ package me.bowdon.ddldiff
 import org.scalatest._
 import org.scalatest.Matchers._
 
-
 object ColumnConstraintParsersImpl extends ColumnConstraintParsers {
   def apply(input: String): Either[String, ColumnConstraint] = {
     parseAll(columnConstraint, input) match {
@@ -82,7 +81,7 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
 
   it should "not parse invalid foreign key column constraints (many cols with trailing comma)" in {
 
-    ColumnConstraintParsersImpl.apply("references bar (id, thing, stuff,)") should be ('left)
+    ColumnConstraintParsersImpl.apply("references bar (id, thing, stuff,)") should be('left)
   }
 
   it should "parse named column constraints" in {

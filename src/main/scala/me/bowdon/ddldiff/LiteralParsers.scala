@@ -36,10 +36,10 @@ trait LiteralParsers extends SQLParsers {
 
   def literalValue: Parser[Literal] = {
     stringLiteral |
-    numericLiteral |
-    nullLiteral |
-    currentDate |
-    currentTimestamp |
-    currentTime // Timestamp must go before time or input not consumed!
+      numericLiteral |
+      nullLiteral |
+      currentDate |
+      currentTimestamp |
+      currentTime // Timestamp must go before time or input not consumed!
   }
 }
