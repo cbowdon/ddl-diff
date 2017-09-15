@@ -1,4 +1,4 @@
-package me.bowdon
+package me.bowdon.ddldiff
 
 import org.scalatest._
 import org.scalatest.Matchers._

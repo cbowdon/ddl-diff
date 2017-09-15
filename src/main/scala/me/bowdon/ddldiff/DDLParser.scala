@@ -1,4 +1,4 @@
-package me.bowdon
+package me.bowdon.ddldiff
 
 // Start with SQLite's grammar.
 // Need plan to support multiple vendor grammars

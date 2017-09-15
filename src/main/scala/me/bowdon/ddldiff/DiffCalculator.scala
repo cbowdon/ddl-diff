@@ -1,4 +1,4 @@
-package me.bowdon
+package me.bowdon.ddldiff
 
 abstract class Migration
 

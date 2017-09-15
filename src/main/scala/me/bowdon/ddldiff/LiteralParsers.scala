@@ -1,4 +1,4 @@
-package me.bowdon
+package me.bowdon.ddldiff
 
 import scala.util.parsing.combinator._
 import java.text.NumberFormat
