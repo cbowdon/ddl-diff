@@ -50,7 +50,7 @@ class MigrationGeneratorSpec extends FlatSpec with Matchers {
 , description text default 'A thing!' check (1 > 0) collate binary );"""
   }
 
-  it should "generate column constraint defs" in {
+  it should "show column constraint defs" in {
     val constraintDefs =
       Table(
         ("constraintDef", "sqlOutput"),
@@ -76,12 +76,12 @@ class MigrationGeneratorSpec extends FlatSpec with Matchers {
 
     forAll(constraintDefs) {
       (constraintDef: ColumnConstraintDef, sqlOutput: String) => {
-        MigrationGenerator.generateColumnConstraintDef(constraintDef) shouldEqual sqlOutput
+        MigrationGenerator.showColumnConstraintDef(constraintDef) shouldEqual sqlOutput
       }
     }
   }
 
-  it should "generate column constraints" in {
+  it should "show column constraints" in {
     val constraints =
       Table(
         ("constraint", "sqlOutput"),
@@ -90,7 +90,7 @@ class MigrationGeneratorSpec extends FlatSpec with Matchers {
 
     forAll(constraints) {
       (constraint: ColumnConstraint, sqlOutput: String) => {
-        MigrationGenerator.generateColumnConstraint(constraint) shouldEqual sqlOutput
+        MigrationGenerator.showColumnConstraint(constraint) shouldEqual sqlOutput
       }
     }
   }
