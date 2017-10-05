@@ -3,11 +3,11 @@ package me.bowdon.ddldiff
 import scala.util.parsing.combinator._
 import java.text.NumberFormat
 
-abstract class Sign
+sealed trait Sign
 case object Plus extends Sign
 case object Minus extends Sign
 
-abstract class Literal
+sealed trait Literal
 case class NumericLiteral(value: Number) extends Literal
 case class SignedNumber(value: NumericLiteral, sign: Sign) extends Literal
 case class StringLiteral(value: String) extends Literal

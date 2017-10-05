@@ -3,7 +3,7 @@ package me.bowdon.ddldiff
 import scala.util.parsing.combinator._
 
 // https://sqlite.org/syntax/column-constraint.html
-abstract class ColumnConstraintDef
+sealed trait ColumnConstraintDef
 case class PrimaryKey(order: Option[Order], autoIncrement: Boolean) extends ColumnConstraintDef
 case object IsNotNull extends ColumnConstraintDef
 case object Unique extends ColumnConstraintDef

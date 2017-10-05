@@ -4,7 +4,7 @@ package me.bowdon.ddldiff
 // Need plan to support multiple vendor grammars
 
 // https://sqlite.org/datatype3.html
-abstract class SQLType
+sealed trait SQLType
 case object Text extends SQLType
 case object Numeric extends SQLType
 case object Integer extends SQLType

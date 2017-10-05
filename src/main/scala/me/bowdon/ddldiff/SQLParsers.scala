@@ -2,7 +2,7 @@ package me.bowdon.ddldiff
 
 import scala.util.parsing.combinator._
 
-abstract class Order
+sealed trait Order
 case object Asc extends Order
 case object Desc extends Order
 
