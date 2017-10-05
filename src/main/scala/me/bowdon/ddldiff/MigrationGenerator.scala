@@ -10,7 +10,49 @@ package me.bowdon.ddldiff
 object MigrationGenerator {
 
   def generate(migration: Migration): String = {
-    ???
+    migration match {
+      // Tables
+      case CreateTable(table) => s"${showTable(table)};"
+      case DropTable(table) => s"""drop table "$table";"""
+      case RenameTable(oldName, newName) => s"""alter table "$oldName" rename to "$newName";"""
+
+      // Columns
+      case AddColumn(table, column) => ???
+      case DropColumn(table, column) => ???
+      case RenameColumn(table, column) => ???
+
+      // Column constraints
+      case AddColumnConstraint(table, column, constraint) => ???
+      case DropColumnConstraint(table, column, constraint) => ???
+
+      // Table constraints
+      case AddTableConstraint(table, constraint) => ???
+      case DropTableConstraint(table, constraint) => ???
+    }
+  }
+
+  def showTable(table: TableDef): String = {
+    val TableDef(name, columns, constraints) = table
+
+    val cols = columns.map(x => showColumn(x._2)).mkString(", ")
+
+    val cons = constraints.map(showTableConstraint).mkString(", ")
+
+    s"create table $name ($cols) $cons".trim
+  }
+
+  def showTableConstraint(tableConstraint: TableConstraint): String = ???
+
+  def showColumn(column: ColumnDef): String = {
+    val ColumnDef(name, sqlType, constraints) = column
+
+    val cons = constraints
+      .map(showColumnConstraint)
+      .toSeq
+      .sorted // we actually need consistency for the tests
+      .mkString(" ")
+
+    s"$name ${sqlType.toString.toLowerCase} $cons".trim
   }
 
   def showColumnConstraint(constraint: ColumnConstraint): String = {

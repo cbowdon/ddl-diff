@@ -44,10 +44,21 @@ class MigrationGeneratorSpec extends FlatSpec with Matchers {
           Set.empty))
 
     MigrationGenerator.generate(createTableMigration) shouldEqual
-    """create table Foo
-( id integer constraint PK_Foo_id primary key asc autoincrement
-, name text not null constraint Uniq_Foo_name unique constraint FK_Foo_name references other(name)
-, description text default 'A thing!' check (1 > 0) collate binary );"""
+    "create table Foo (id integer constraint PK_Foo_id primary key asc autoincrement, name text constraint FK_Foo_name references other(name) constraint Uniq_Foo_name unique not null, description text check (1 > 0) collate binary default 'A thing!');"
+  }
+
+  it should "show column defs" in {
+    val columnDefs =
+      Table(
+        ("columnDef", "sqlOutput"),
+        (ColumnDef("foo", Text, Set()), "foo text"),
+        (ColumnDef("foo", Blob, Set(ColumnConstraint(None, Unique), ColumnConstraint(None, IsNotNull))), "foo blob not null unique"))
+
+    forAll(columnDefs) {
+      (columnDef: ColumnDef, sqlOutput: String) => {
+        MigrationGenerator.showColumn(columnDef) shouldEqual sqlOutput
+      }
+    }
   }
 
   it should "show column constraint defs" in {
