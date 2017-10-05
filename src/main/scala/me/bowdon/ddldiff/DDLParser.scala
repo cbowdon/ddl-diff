@@ -1,29 +1,5 @@
 package me.bowdon.ddldiff
 
-// Start with SQLite's grammar.
-// Need plan to support multiple vendor grammars
-
-// https://sqlite.org/datatype3.html
-sealed trait SQLType
-case object Text extends SQLType
-case object Numeric extends SQLType
-case object Integer extends SQLType
-case object Real extends SQLType
-case object Blob extends SQLType
-
-case class TableConstraint()
-
-case class ColumnDef(
-  name: String,
-  sqlType: SQLType,
-  constraints: Set[ColumnConstraint])
-
-// https://sqlite.org/syntax/create-table-stmt.html
-case class TableDef(
-  name: String,
-  columns: Map[String, ColumnDef],
-  constraints: Set[TableConstraint])
-
 class ParseError(reason: String) {
   override def toString = reason
 }

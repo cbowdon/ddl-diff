@@ -2,10 +2,6 @@ package me.bowdon.ddldiff
 
 import scala.util.parsing.combinator._
 
-sealed trait Order
-case object Asc extends Order
-case object Desc extends Order
-
 /**
  * Building blocks for SQL parsing
  */
