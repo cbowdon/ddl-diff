@@ -19,7 +19,7 @@ case class ColumnConstraint(name: Option[String], definition: ColumnConstraintDe
 trait ColumnConstraintParsers extends LiteralParsers {
 
   def primaryKey: Parser[ColumnConstraintDef] = {
-    kw("primary") ~ kw("key") ~> order.? ~ kw("autoincrement").? ^^ {
+    p"primary key" ~> order.? ~ p"autoincrement".? ^^ {
       case order ~ autoincrement => PrimaryKey(order, autoincrement match {
         case Some(_) => true
         case None => false
@@ -28,15 +28,15 @@ trait ColumnConstraintParsers extends LiteralParsers {
   }
 
   def notNull: Parser[ColumnConstraintDef] = {
-    kw("not") ~ kw("null") ^^ { _ => IsNotNull }
+    p"not null" ^^ { _ => IsNotNull }
   }
 
   def unique: Parser[ColumnConstraintDef] = {
-    kw("unique") ^^ { _ => Unique }
+    p"unique" ^^ { _ => Unique }
   }
 
   def collate: Parser[ColumnConstraintDef] = {
-    kw("collate") ~> identifier ^^ { Collate(_) }
+    p"collate" ~> identifier ^^ { Collate(_) }
   }
 
   def signedNumber: Parser[SignedNumber] = {
@@ -51,16 +51,16 @@ trait ColumnConstraintParsers extends LiteralParsers {
   }
 
   def default: Parser[ColumnConstraintDef] = {
-    kw("default") ~> (signedNumber | literalValue) ^^ { Default(_) }
+    p"default" ~> (signedNumber | literalValue) ^^ { Default(_) }
   }
 
   def check: Parser[ColumnConstraintDef] = {
     // TODO this is a buggy cheat: needs to be a complete expr parser here
-    kw("check") ~> parens("[^)]+".r) ^^ { Check(_) }
+    p"check" ~> parens("[^)]+".r) ^^ { Check(_) }
   }
 
   def foreignKey: Parser[ColumnConstraintDef] = {
-    kw("references") ~> identifier ~ parens(repsep(identifier, ",")).? ^^ {
+    p"references" ~> identifier ~ parens(repsep(identifier, ",")).? ^^ {
       case table ~ columns => ForeignKey(table, columns match {
         case Some(cols) => cols
         case None => Seq.empty
@@ -72,7 +72,7 @@ trait ColumnConstraintParsers extends LiteralParsers {
     primaryKey | notNull | unique | collate | default | check | foreignKey
   }
 
-  def constraintName: Parser[String] = kw("constraint") ~> identifier
+  def constraintName: Parser[String] = p"constraint" ~> identifier
 
   def columnConstraint: Parser[ColumnConstraint] = {
     constraintName.? ~ constraintDef ^^ {

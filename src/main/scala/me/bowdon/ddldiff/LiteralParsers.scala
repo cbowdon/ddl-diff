@@ -26,13 +26,13 @@ trait LiteralParsers extends SQLParsers {
   // TODO escaping quotes
   def stringLiteral: Parser[StringLiteral] = "'" ~> "[^']*".r <~ "'" ^^ { StringLiteral(_) }
 
-  def nullLiteral: Parser[Literal] = kw("null") ^^ { _ => Null }
+  def nullLiteral: Parser[Literal] = p"null" ^^ { _ => Null }
 
-  def currentTime: Parser[Literal] = kw("current_time") ^^ { _ => CurrentTime }
+  def currentTime: Parser[Literal] = p"current_time" ^^ { _ => CurrentTime }
 
-  def currentDate: Parser[Literal] = kw("current_date") ^^ { _ => CurrentDate }
+  def currentDate: Parser[Literal] = p"current_date" ^^ { _ => CurrentDate }
 
-  def currentTimestamp: Parser[Literal] = kw("current_timestamp") ^^ { _ => CurrentTimestamp }
+  def currentTimestamp: Parser[Literal] = p"current_timestamp" ^^ { _ => CurrentTimestamp }
 
   def literalValue: Parser[Literal] = {
     stringLiteral |

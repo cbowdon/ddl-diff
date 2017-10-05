@@ -11,10 +11,21 @@ case object Desc extends Order
  */
 trait SQLParsers extends RegexParsers {
 
-  /**
-   * Case-insensitive parser, i.e. for keywords
+  /** 
+   * Custom string interpolation to make specifying keywords easier
+   *
+   * This builds a regex parser from the given string that is case-insensitive and ignores whitespace.
    */
-  def kw(word: String): Parser[String] = f"(?i)$word".r ^^ { _.toLowerCase }
+  implicit class SQLParserHelper(val sc: StringContext) {
+    def p(args: Any*): Parser[String] = {
+      val words = sc.s(args:_*)
+        .split(" ")
+        .filter(x => x.trim != "")
+        .mkString("\\s+")
+
+      raw"(?i)\s*$words\s*".r ^^ { _.toLowerCase().trim }
+    }
+  }
 
   // TODO: ANSI quotes
   def identifier: Parser[String] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { _.toString }
@@ -24,7 +35,7 @@ trait SQLParsers extends RegexParsers {
    */
   def parens[T](bodyParser: Parser[T]): Parser[T] = "(" ~> bodyParser <~ ")"
 
-  def order: Parser[Order] = (kw("asc") | kw("desc")) ^^ {
+  def order: Parser[Order] = (p"asc" | p"desc") ^^ {
     (_: String) match {
       case "asc" => Asc
       case "desc" => Desc

@@ -30,16 +30,16 @@ class ParseError(reason: String) {
 
 object DDLParser extends ColumnConstraintParsers {
 
-  def create: Parser[String] = kw("create") <~ (kw("temp") | kw("temporary")).?
+  def create: Parser[String] = p"create" <~ (p"temp" | p"temporary").?
 
   // TODO affinities
   // https://sqlite.org/datatype3.html#determination_of_column_affinity
   def sqlType: Parser[SQLType] = {
-    kw("text") ^^ { _ => Text } |
-      kw("numeric") ^^ { _ => Numeric } |
-      kw("integer") ^^ { _ => Integer } |
-      kw("real") ^^ { _ => Real } |
-      kw("blob") ^^ { _ => Blob }
+    p"text" ^^ { _ => Text } |
+      p"numeric" ^^ { _ => Numeric } |
+      p"integer" ^^ { _ => Integer } |
+      p"real" ^^ { _ => Real } |
+      p"blob" ^^ { _ => Blob }
   }
 
   def column: Parser[ColumnDef] = {
@@ -58,7 +58,7 @@ object DDLParser extends ColumnConstraintParsers {
   }
 
   def table: Parser[TableDef] = {
-    kw("table") ~ (kw("if") ~ kw("not") ~ kw("exists")).? ~> identifier ~ columns ^^ {
+    p"table" ~ p"if not exists".? ~> identifier ~ columns ^^ {
       case name ~ cols => TableDef(name, cols, Set.empty)
     }
   }
