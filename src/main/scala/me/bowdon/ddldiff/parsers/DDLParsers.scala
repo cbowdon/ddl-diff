@@ -1,10 +1,12 @@
-package me.bowdon.ddldiff
+package me.bowdon.ddldiff.parsers
+
+import me.bowdon.ddldiff.ast._
 
 class ParseError(reason: String) {
   override def toString = reason
 }
 
-object DDLParser extends ColumnConstraintParsers {
+object DDLParsers extends ColumnConstraintParsers {
 
   def create: Parser[String] = p"create" <~ (p"temp" | p"temporary").?
 
@@ -25,7 +27,7 @@ object DDLParser extends ColumnConstraintParsers {
     }
   }
 
-  def columns: Parser[Map[String, ColumnDef]] = {
+  def columns: Parser[Map[Identifier, ColumnDef]] = {
 
     val parser = parens(repsep(column, ","))
 

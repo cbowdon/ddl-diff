@@ -1,4 +1,6 @@
-package me.bowdon.ddldiff
+package me.bowdon.ddldiff.parsers
+
+import me.bowdon.ddldiff.ast._
 
 import scala.util.parsing.combinator._
 
@@ -58,7 +60,7 @@ trait ColumnConstraintParsers extends LiteralParsers {
     primaryKey | notNull | unique | collate | default | check | foreignKey
   }
 
-  def constraintName: Parser[String] = p"constraint" ~> identifier
+  def constraintName: Parser[Identifier] = p"constraint" ~> identifier
 
   def columnConstraint: Parser[ColumnConstraint] = {
     constraintName.? ~ constraintDef ^^ {

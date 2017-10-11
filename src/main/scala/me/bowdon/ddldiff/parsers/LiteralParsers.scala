@@ -1,4 +1,6 @@
-package me.bowdon.ddldiff
+package me.bowdon.ddldiff.parsers
+
+import me.bowdon.ddldiff.ast._
 
 import scala.util.parsing.combinator._
 import java.text.NumberFormat

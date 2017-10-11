@@ -1,6 +1,7 @@
-package me.bowdon.ddldiff
+package me.bowdon.ddldiff.parsers
 
 import scala.util.parsing.combinator._
+import me.bowdon.ddldiff.ast._
 
 /**
  * Building blocks for SQL parsing
@@ -24,7 +25,7 @@ trait SQLParsers extends RegexParsers {
   }
 
   // TODO: ANSI quotes
-  def identifier: Parser[String] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { _.toString }
+  def identifier: Parser[Identifier] = "[A-Za-z_][0-9A-Za-z_]+".r ^^ { x => Identifier(x.toString) }
 
   /**
    * Utility parser for expressions in parentheses

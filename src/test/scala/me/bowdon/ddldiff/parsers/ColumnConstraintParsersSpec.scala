@@ -1,7 +1,8 @@
-package me.bowdon.ddldiff
+package me.bowdon.ddldiff.parsers
 
 import org.scalatest._
 import org.scalatest.Matchers._
+import me.bowdon.ddldiff.ast._
 
 object ColumnConstraintParsersImpl extends ColumnConstraintParsers {
   def apply(input: String): Either[String, ColumnConstraint] = {
@@ -31,7 +32,7 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
 
   it should "parse collate column constraints" in {
 
-    ColumnConstraintParsersImpl.apply("collate binary") shouldEqual Right(ColumnConstraint(None, Collate("binary")))
+    ColumnConstraintParsersImpl.apply("collate binary") shouldEqual Right(ColumnConstraint(None, Collate(Identifier("binary"))))
   }
 
   it should "parse default column constraints (numeric)" in {
@@ -66,17 +67,17 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
 
   it should "parse foreign key column constraints (no cols)" in {
 
-    ColumnConstraintParsersImpl.apply("references bar") shouldEqual Right(ColumnConstraint(None, ForeignKey("bar", Seq.empty)))
+    ColumnConstraintParsersImpl.apply("references bar") shouldEqual Right(ColumnConstraint(None, ForeignKey(Identifier("bar"), Seq.empty)))
   }
 
   it should "parse foreign key column constraints (one col)" in {
 
-    ColumnConstraintParsersImpl.apply("references bar (id)") shouldEqual Right(ColumnConstraint(None, ForeignKey("bar", Seq("id"))))
+    ColumnConstraintParsersImpl.apply("references bar (id)") shouldEqual Right(ColumnConstraint(None, ForeignKey(Identifier("bar"), Seq(Identifier("id")))))
   }
 
   it should "parse foreign key column constraints (many cols)" in {
 
-    ColumnConstraintParsersImpl.apply("references bar (id, thing, stuff)") shouldEqual Right(ColumnConstraint(None, ForeignKey("bar", Seq("id", "thing", "stuff"))))
+    ColumnConstraintParsersImpl.apply("references bar (id, thing, stuff)") shouldEqual Right(ColumnConstraint(None, ForeignKey(Identifier("bar"), Seq(Identifier("id"), Identifier("thing"), Identifier("stuff")))))
   }
 
   it should "not parse invalid foreign key column constraints (many cols with trailing comma)" in {
@@ -86,6 +87,6 @@ class ColumnConstraintParsersSpec extends FlatSpec with Matchers {
 
   it should "parse named column constraints" in {
 
-    ColumnConstraintParsersImpl.apply("constraint it_aint_null not null") shouldEqual Right(ColumnConstraint(Some("it_aint_null"), IsNotNull))
+    ColumnConstraintParsersImpl.apply("constraint it_aint_null not null") shouldEqual Right(ColumnConstraint(Some(Identifier("it_aint_null")), IsNotNull))
   }
 }

@@ -1,5 +1,7 @@
 package me.bowdon.ddldiff
 
+import me.bowdon.ddldiff.ast._
+
 /** MigrationGenerator converts Migrations to DDL statements
  *
  * Main method here is "generate" to actually output the DDL statement Strings.
@@ -9,12 +11,14 @@ package me.bowdon.ddldiff
  */
 object MigrationGenerator {
 
+  import ShowSQL._
+
   def generate(migration: Migration): String = {
     migration match {
       // Tables
       case CreateTable(table) => s"${showTable(table)};"
       case DropTable(table) => s"""drop table "$table";"""
-      case RenameTable(oldName, newName) => s"""alter table "$oldName" rename to "$newName";"""
+      case RenameTable(oldName, newName) => sql"""alter table "$oldName" rename to "$newName";"""
 
       // Columns
       case AddColumn(table, column) => ???
@@ -47,55 +51,11 @@ object MigrationGenerator {
     val ColumnDef(name, sqlType, constraints) = column
 
     val cons = constraints
-      .map(showColumnConstraint)
+      .map(cc => sql"$cc")
       .toSeq
       .sorted // we actually need consistency for the tests
       .mkString(" ")
 
-    s"$name ${sqlType.toString.toLowerCase} $cons".trim
-  }
-
-  def showColumnConstraint(constraint: ColumnConstraint): String = {
-    constraint match {
-      case ColumnConstraint(None, ccDef) => showColumnConstraintDef(ccDef)
-      case ColumnConstraint(Some(name), ccDef) => s"constraint $name ${showColumnConstraintDef(ccDef)}"
-    }
-  }
-
-  def showColumnConstraintDef(constraintDef: ColumnConstraintDef): String = {
-    constraintDef match {
-      case Unique => "unique"
-      case IsNotNull => "not null"
-      case Default(literal) => s"default ${showLiteral(literal)}"
-      case Collate(collation) => s"collate $collation"
-      case Check(expr) => s"check ($expr)"
-      case PrimaryKey(orderOpt, autoIncrement) => {
-        val order = orderOpt match {
-          case None => ""
-          case Some(x) => x.toString().toLowerCase()
-        }
-        val autoInc = if (autoIncrement) "autoincrement" else ""
-        Seq("primary key", order, autoInc).filter(x => x != "").mkString(" ")
-      }
-      case ForeignKey(table, cols) => s"references $table(${cols.mkString(", ")})"
-    }
-  }
-
-  private def showLiteral(literal: Literal): String = {
-    literal match {
-      case NumericLiteral(v) => v.toString
-      case SignedNumber(v, s) => s"${showSign(s)}v"
-      case StringLiteral(v) => s"'$v'"
-      case BlobLiteral(v) => v.toString
-      case Null => "null"
-      case CurrentTime => "current_time"
-      case CurrentDate => "current_date"
-      case CurrentTimestamp => "current_timestamp"
-    }
-  }
-
-  private def showSign(sign: Sign): String = sign match {
-    case Plus => "+"
-    case Minus => "-"
+    sql"$name $sqlType $cons".trim
   }
 }

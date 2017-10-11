@@ -1,7 +1,8 @@
-package me.bowdon.ddldiff
+package me.bowdon.ddldiff.parsers
 
 import org.scalatest._
 import org.scalatest.Matchers._
+import me.bowdon.ddldiff.ast._
 
 object LiteralParsersImpl extends LiteralParsers {
   // Just to exercise the parsers in a test-friendly way
